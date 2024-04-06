@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 
 class Node:
@@ -8,31 +8,30 @@ class Node:
 
 
 class LinkedList:
-    def __init__(self, data: Optional[int] = None) -> None:
-
+    def __init__(self, data: Optional[int] = None, next_node: Optional['Node'] = None) -> None:
         if data is None:
             self.head: Optional['Node'] = None
             self.tail: Optional['Node'] = None
             self.__size: int = 0
             return
 
-        self.head: Optional['Node'] = Node(data)
+        self.head: Optional['Node'] = Node(data, next_node=next_node)
         self.tail: Optional['Node'] = self.head
         self.__size: int = 1
 
-    def append(self, data: int) -> None:
+    def append(self, data: Optional[int]) -> None:
         self.__size += 1
         if not self.tail:
             self.head = self.tail = Node(data)
             return
 
-        if self.tail == self.head:
+        if self.tail is self.head:
             self.tail = self.head.next = Node(data)
 
         else:
             self.tail.next = self.tail = Node(data)
 
-    def prepend(self, data: int) -> None:
+    def prepend(self, data: Optional[int]) -> None:
         self.__size += 1
         if not self.head:
             self.head = self.tail = Node(data)
@@ -40,7 +39,7 @@ class LinkedList:
 
         self.head = Node(data, self.head)
 
-    def insertion(self, after: int, data: int) -> None:
+    def insertion(self, after: Optional[int], data: Optional[int]) -> None:
         if not self.head:
             raise Exception(f"There is no number {after} in this linked list! (Linked list is empty)")
 
@@ -59,14 +58,14 @@ class LinkedList:
             return
 
         current: 'Node' = self.head
-        result: list = []
+        result: List[Optional[int]] = []
         while current:
             result.append(current.data)
             current = current.next
 
         print(f"There are {self.__size} elements:", *result, sep=' ')
 
-    def search(self, target: int) -> Optional['Node']:
+    def search(self, target: Optional[int]) -> Optional['Node']:
         if not self.head:
             return None
 
@@ -77,18 +76,25 @@ class LinkedList:
             current = current.next
         return None
 
-    def deletion(self, target) -> None:
-        if not self.search(target):
+    def deletion(self, target: Optional[int]) -> None:
+        del_element: Optional['Node'] = self.search(target)
+        if not del_element:
             raise Exception("No such element in this list")
 
         self.__size -= 1
-        if self.search(target) == self.head:
+
+        if del_element is self.head and del_element is self.tail:
+            self.head = self.tail = None
+            return
+
+        if del_element is self.head:
             self.head = self.head.next
             return
 
+
         current: 'Node' = self.head
         while current.next:
-            if current.next == self.search(target):
+            if current.next is del_element:
                 current.next = current.next.next
                 return
             current = current.next
@@ -99,20 +105,20 @@ class LinkedList:
             return start
 
         pivot_prev: 'Node' = start
-        curr: 'Node' = start
+        current: 'Node' = start
         pivot: int = end.data
 
         while start is not end:
             if start.data < pivot:
-                pivot_prev = curr
-                temp: int = curr.data
-                curr.data = start.data
+                pivot_prev = current
+                temp: int = current.data
+                current.data = start.data
                 start.data = temp
-                curr = curr.next
+                current = current.next
             start = start.next
 
-        end.data = curr.data
-        curr.data = pivot
+        end.data = current.data
+        current.data = pivot
         return pivot_prev
 
     def _quick_sort(self, start: Optional['Node'], end: Optional['Node']) -> None:
@@ -130,3 +136,6 @@ class LinkedList:
 
     def sort(self) -> None:
         self._quick_sort(self.head, self.tail)
+
+    def size(self) -> int:
+        return self.__size
